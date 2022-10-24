@@ -10,33 +10,10 @@ const String errorInternetConnection = "ไม่สามารถเชื่�
 const String errorDataNotFound = "ไม่พบข้อมูล";
 const String errorSomethingWentWrong = "เกิดข้อผิดพลาดในการทำงาน กรุณาลองใหม่อีกครั้ง";
 
-class DefaultReturn<Class> {
-  final int status;
-  final String message;
-  final Class? data;
-
-  DefaultReturn({required this.status, required this.message, this.data});
-  factory DefaultReturn.fromJson(Map<String, dynamic> json, Function(dynamic) callback) {
-    Class? temp;
-    String? error;
-    try{
-      temp = callback(json['data']);
-    } catch(e) {
-      temp = null;
-      error = json['status']==200?e.toString():null;
-    }
-    return DefaultReturn(
-        status: json['status'],
-        message: error??json['message'],
-        data: temp
-    );
-  }
-}
-
-Future<DefaultReturn<Class>> defaultApiGetNoLoad<Class>(Map<String, String> data, String url,
-    Function(dynamic) jsonConvert, Future<bool> Function(DefaultReturn<Class>) onSuccess) async {
+Future<Class> defaultApiGetNoLoad<Class>(Map<String, String> data, String url,
+    Function(dynamic) jsonConvert, Future<bool> Function(Class) onSuccess) async {
   http.Response response;
-  DefaultReturn<Class> responseData;
+  Class responseData;
   try {
     String query = '';
     for(String key in data.keys){
@@ -49,17 +26,15 @@ Future<DefaultReturn<Class>> defaultApiGetNoLoad<Class>(Map<String, String> data
           "authorization": API_KEY
         }
     );
-    responseData = DefaultReturn<Class>.fromJson(json.decode(response.body), jsonConvert);
+    responseData = jsonConvert(json.decode(response.body));
   } catch (e) {
+    print(e);
     throw errorInternetConnection;
   }
-  if (responseData.status == 200) {
-    if(await onSuccess(responseData)){
-      return responseData;
-    }
-    throw errorSomethingWentWrong;
+  if(await onSuccess(responseData)){
+    return responseData;
   }
-  throw responseData.message;
+  throw errorSomethingWentWrong;
 }
 
 /*=================Start=GetForecastDataList====================*/
@@ -96,12 +71,12 @@ class ForecastData {
 }
 
 class ForecastDetail {
-  final int cond;
-  final double rh;
-  final double tc_max;
-  final double tc_min;
-  final double wd10m;
-  final double ws10m;
+  final String cond;
+  final String rh;
+  final String tc_max;
+  final String tc_min;
+  final String wd10m;
+  final String ws10m;
 
   ForecastDetail({
     required this.cond,
@@ -114,19 +89,19 @@ class ForecastDetail {
 
   factory ForecastDetail.fromJson(Map<String, dynamic> json) {
     return ForecastDetail(
-        cond: json["cond"],
-        rh: json["rh"],
-        tc_max: json["tc_max"],
-        tc_min: json["tc_min"],
-        wd10m: json["wd10m"],
-        ws10m: json["ws10m"]
+        cond: "${json["cond"]??''}",
+        rh: "${json["rh"]??''}",
+        tc_max: "${json["tc_max"]??''}",
+        tc_min: "${json["tc_min"]??''}",
+        wd10m: "${json["wd10m"]??''}",
+        ws10m: "${json["ws10m"]??''}"
     );
   }
 }
 
-Future<DefaultReturn<List<ForecastList>>> getForecastDataList(Map<String, String> requestData) async {
+Future<List<ForecastList>> getForecastDataList(Map<String, String> requestData) async {
   return defaultApiGetNoLoad<List<ForecastList>>(requestData, "/nwpapi/v1/forecast/location/daily/at", (data) => (data['WeatherForecasts'] as List).map((i) => ForecastList.fromJson(i)).toList(), (returnData) async {
-    if(returnData.data==null||returnData.data!.isEmpty){
+    if(returnData.isEmpty){
       return false;
     }
     return true;
