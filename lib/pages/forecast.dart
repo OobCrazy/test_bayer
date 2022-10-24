@@ -1,3 +1,4 @@
+import 'package:bordered_text/bordered_text.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../service/api.dart';
@@ -15,6 +16,7 @@ class _ForecastPageState extends State<ForecastPage> {
   String errorMessage = '';
   List<ForecastData> forecasts = [];
   DateFormat dateFormat = DateFormat('yyyy-MM-dd');
+  DateFormat showFormat = DateFormat('dd MMM yyyy');
 
   @override
   void initState() {
@@ -50,6 +52,42 @@ class _ForecastPageState extends State<ForecastPage> {
         return const AssetImage("assets/12_very_hot.jpg");
     }
   }
+  String getWeatherText(String con){
+    switch(con){
+      case "1":
+        return "ท้องฟ้าแจ่มใส";
+      case "2":
+        return "มีเมฆบางส่วน";
+      case "3":
+        return "เมฆเป็นส่วนมาก";
+      case "4":
+        return "มีเมฆมาก";
+      case "5":
+        return "ฝนตกเล็กน้อย";
+      case "6":
+        return "ฝนปานกลาง";
+      case "7":
+        return "ฝนตกหนัก";
+      case "8":
+        return "ฝนฟ้าคะนอง";
+      case "9":
+        return "อากาศหนาวจัด";
+      case "10":
+        return "อากาศหนาว";
+      case "11":
+        return "อากาศเย็น";
+      default:
+        return "อากาศร้อนจัด";
+    }
+  }
+  String getWeatherTime(String time){
+    try{
+      DateTime dt = DateTime.parse(time);
+      return showFormat.format(dt);
+    } catch(e) {
+      return '';
+    }
+  }
 
   Future<void> loadData() async {
     if(isLoading){
@@ -76,7 +114,7 @@ class _ForecastPageState extends State<ForecastPage> {
         "lon": position.longitude.toString(),
         "fields": "tc_max,tc_min,rh,ws10m,wd10m,cond",
         "date": dateFormat.format(DateTime.now()),
-        "duration": "20"
+        "duration": "7"
       }))[0].forecasts;
       if(data.isNotEmpty){
         setState(() {
@@ -115,9 +153,115 @@ class _ForecastPageState extends State<ForecastPage> {
                       ),
                       elevation: 5,
                       margin: const EdgeInsets.all(10),
-                      child: Image(
-                        image: getWeatherImage(forecasts[index].data?.cond??''),
-                        fit: BoxFit.fill,
+                      child: Stack(
+                        children: [
+                          Image(
+                            image: getWeatherImage(forecasts[index].data?.cond??''),
+                            fit: BoxFit.fill,
+                          ),
+                          Positioned(
+                            left: 0,
+                            right: 0,
+                            top: 0,
+                            bottom: 0,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      BorderedText(
+                                        strokeWidth: 3.0,
+                                        strokeColor: Colors.black,
+                                        child: Text(
+                                          getWeatherText(forecasts[index].data?.cond??''),
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(fontSize: 30, color: Colors.white)
+                                        )
+                                      ),
+                                      BorderedText(
+                                          strokeWidth: 3.0,
+                                          strokeColor: Colors.white,
+                                          child: Text(
+                                              getWeatherTime(forecasts[index].time),
+                                              textAlign: TextAlign.center,
+                                              style: const TextStyle(fontSize: 25, color: Colors.black)
+                                          )
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                        BorderedText(
+                                            strokeWidth: 3.0,
+                                            strokeColor: Colors.white,
+                                            child: const Text(
+                                                "อุณหภูมิ",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(fontSize: 20, color: Colors.black)
+                                            )
+                                        ),
+                                        const SizedBox(height: 10),
+                                        BorderedText(
+                                            strokeWidth: 3.0,
+                                            strokeColor: Colors.black,
+                                            child: Text(
+                                                "ต่ำสุด: ${forecasts[index].data?.tc_min??''} °C",
+                                                textAlign: TextAlign.start,
+                                                style: const TextStyle(fontSize: 18, color: Colors.white)
+                                            )
+                                        ),
+                                        BorderedText(
+                                            strokeWidth: 3.0,
+                                            strokeColor: Colors.black,
+                                            child: Text(
+                                                "สูงสุด: ${forecasts[index].data?.tc_max??''} °C",
+                                                textAlign: TextAlign.start,
+                                                style: const TextStyle(fontSize: 18, color: Colors.white)
+                                            )
+                                        )
+                                      ]),
+                                      Column(
+                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                          children: [
+                                        BorderedText(
+                                            strokeWidth: 3.0,
+                                            strokeColor: Colors.white,
+                                            child: const Text(
+                                                "ความชื้น",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(fontSize: 20, color: Colors.black)
+                                            )
+                                        ),
+                                        const SizedBox(height: 10),
+                                        BorderedText(
+                                            strokeWidth: 3.0,
+                                            strokeColor: Colors.black,
+                                            child: Text(
+                                                "${forecasts[index].data?.rh??''} %",
+                                                textAlign: TextAlign.center,
+                                                style: const TextStyle(fontSize: 18, color: Colors.white)
+                                            )
+                                        )
+                                      ]),
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ),
+                          )
+                        ],
                       ),
                     );
                   }):

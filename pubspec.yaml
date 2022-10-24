@@ -38,6 +38,7 @@ dependencies:
   intl: ^0.17.0
   geolocator: ^9.0.2
   floating_action_bubble: ^1.1.4
+  bordered_text: ^2.0.0
 
 dev_dependencies:
   flutter_test:
