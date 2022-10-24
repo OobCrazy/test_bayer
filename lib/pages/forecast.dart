@@ -22,6 +22,35 @@ class _ForecastPageState extends State<ForecastPage> {
     loadData();
   }
 
+  AssetImage getWeatherImage(String con){
+    switch(con){
+      case "1":
+        return const AssetImage("assets/01_clear.jpg");
+      case "2":
+        return const AssetImage("assets/02_partly_cloudy.jpg");
+      case "3":
+        return const AssetImage("assets/03_cloudy.jpg");
+      case "4":
+        return const AssetImage("assets/04_overcast.jpg");
+      case "5":
+        return const AssetImage("assets/05_light_rain.jpg");
+      case "6":
+        return const AssetImage("assets/06_moderate_rain.jpg");
+      case "7":
+        return const AssetImage("assets/07_heavy_rain.jpg");
+      case "8":
+        return const AssetImage("assets/08_thunderstorm.jpg");
+      case "9":
+        return const AssetImage("assets/09_very_cold.jpg");
+      case "10":
+        return const AssetImage("assets/10_cold.jpg");
+      case "11":
+        return const AssetImage("assets/11_cool.jpg");
+      default:
+        return const AssetImage("assets/12_very_hot.jpg");
+    }
+  }
+
   Future<void> loadData() async {
     if(isLoading){
       return;
@@ -78,15 +107,18 @@ class _ForecastPageState extends State<ForecastPage> {
               child: forecasts.isNotEmpty?ListView.builder(
                   itemCount: forecasts.length,
                   itemBuilder: (BuildContext context, int index) {
-                    return Column(
-                      children: [
-                        Text(forecasts[index].data?.cond.toString()??''),
-                        Text(forecasts[index].data?.rh.toString()??''),
-                        Text(forecasts[index].data?.tc_max.toString()??''),
-                        Text(forecasts[index].data?.tc_min.toString()??''),
-                        Text(forecasts[index].data?.wd10m.toString()??''),
-                        Text(forecasts[index].data?.ws10m.toString()??'')
-                      ],
+                    return Card(
+                      semanticContainer: true,
+                      clipBehavior: Clip.antiAliasWithSaveLayer,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      elevation: 5,
+                      margin: const EdgeInsets.all(10),
+                      child: Image(
+                        image: getWeatherImage(forecasts[index].data?.cond??''),
+                        fit: BoxFit.fill,
+                      ),
                     );
                   }):
               isLoading?const Center(
