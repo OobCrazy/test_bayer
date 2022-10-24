@@ -47,7 +47,7 @@ class _ForecastPageState extends State<ForecastPage> {
         "lon": position.longitude.toString(),
         "fields": "tc_max,tc_min,rh,ws10m,wd10m,cond",
         "date": dateFormat.format(DateTime.now()),
-        "duration": "7"
+        "duration": "20"
       }))[0].forecasts;
       if(data.isNotEmpty){
         setState(() {

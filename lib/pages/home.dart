@@ -1,11 +1,14 @@
-import 'package:flutter/cupertino.dart';
+import 'package:floating_action_bubble/floating_action_bubble.dart';
 import 'package:flutter/material.dart';
-import 'package:sliding_up_panel/sliding_up_panel.dart';
+import 'package:test_bayer/pages/buyer.dart';
 import 'package:test_bayer/pages/forecast.dart';
+import 'package:test_bayer/pages/profitCalculator.dart';
 
 int page = 0;
 final List<Widget> pagesList = [
-  const ForecastPage()
+  const ForecastPage(),
+  const BuyerPage(),
+  const ProfitCalculatorPage()
 ];
 
 class HomePage extends StatefulWidget {
@@ -15,43 +18,23 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  PanelController panelController = PanelController();
+class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin{
+  late Animation<double> _animation;
+  late AnimationController _animationController;
+  bool isMenuOpened = false;
 
-  Widget getPanel(){
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top:10.0, bottom: 10.0),
-          child: MaterialButton(
-            height: 45,
-            minWidth: MediaQuery.of(context).size.width*0.8,
-            textColor: Colors.white,
-            color: Colors.blue,
-            child: const Text("เปิด/ปิดเมนู"),
-              onPressed: (){
-                if(!panelController.isAttached){return;}
-                if(panelController.isPanelClosed){
-                  setState((){
-                    panelController.open();
-                  });
-                  return;
-                }
-                setState((){
-                  panelController.close();
-                });
-              }
-          ),
-        ),
-        Expanded(child: SingleChildScrollView(child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: []
-        )))
-      ]
+  @override
+  void initState(){
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 260),
     );
+
+    final curvedAnimation = CurvedAnimation(curve: Curves.easeInOut, parent: _animationController);
+    _animation = Tween<double>(begin: 0, end: 1).animate(curvedAnimation);
+
+    super.initState();
   }
 
   @override
@@ -60,15 +43,71 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text("Test Bayer"),
       ),
-      body: SafeArea(
-        child: SlidingUpPanel(
-          controller: panelController,
-          minHeight: 65,
-          maxHeight: MediaQuery.of(context).size.height*0.8,
-          panel: getPanel(),
-          body: pagesList[page]
+      body: pagesList[page],
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        floatingActionButton: FloatingActionBubble(
+          backGroundColor: Colors.blue,
+          iconColor: Colors.white,
+            iconData: isMenuOpened?Icons.close:Icons.menu,
+          onPress: (){
+            if(isMenuOpened){
+              _animationController.reverse();
+              setState((){
+                isMenuOpened = false;
+              });
+              return;
+            }
+            _animationController.forward();
+            setState((){
+              isMenuOpened = true;
+            });
+          },
+            animation: _animation,
+          items: [
+            Bubble(
+              title:"พยากรณ์อากาศ",
+              iconColor: Colors.white,
+              bubbleColor: Colors.blue,
+              icon: Icons.sunny_snowing,
+              titleStyle: const TextStyle(fontSize: 16 , color: Colors.white),
+              onPress: () {
+                _animationController.reverse();
+                setState((){
+                  page = 0;
+                  isMenuOpened = false;
+                });
+              },
+            ),
+            Bubble(
+              title:"ราคาผลผลิต",
+              iconColor: Colors.white,
+              bubbleColor: Colors.blue,
+              icon: Icons.currency_exchange,
+              titleStyle: const TextStyle(fontSize: 16 , color: Colors.white),
+              onPress: () {
+                _animationController.reverse();
+                setState((){
+                  page = 1;
+                  isMenuOpened = false;
+                });
+              },
+            ),
+            Bubble(
+              title:"คำนวณผลกำไร",
+              iconColor: Colors.white,
+              bubbleColor: Colors.blue,
+              icon: Icons.calculate_outlined,
+              titleStyle: const TextStyle(fontSize: 16 , color: Colors.white),
+              onPress: () {
+                _animationController.reverse();
+                setState((){
+                  page = 2;
+                  isMenuOpened = false;
+                });
+              },
+            ),
+          ]
         )
-      )
     );
   }
 }

@@ -55,9 +55,10 @@ class ForecastList {
 }
 
 class ForecastData {
+  final String time;
   final ForecastDetail? data;
 
-  ForecastData({this.data});
+  ForecastData({required this.time, this.data});
 
   factory ForecastData.fromJson(Map<String, dynamic> json) {
     ForecastDetail? temp;
@@ -65,6 +66,7 @@ class ForecastData {
       temp = ForecastDetail.fromJson(json["data"]);
     } catch(e){}
     return ForecastData(
+      time: json["time"],
         data: temp
     );
   }
